@@ -352,7 +352,7 @@ class SessionCookie implements SessionHandlerInterface{
         $this->setcookie('psiv2',   $_COOKIE['psiv']);
         $this->setcookie('psts2',   $_COOKIE['psts']);
         $_COOKIE['pskey2'] = $_COOKIE['pskey'];
-        $_COOKIE['psiv2']  = $_COOKIE['psis'];
+        $_COOKIE['psiv2']  = $_COOKIE['psiv'];
         $_COOKIE['psts2']  = $_COOKIE['psts'];
 
         $this->setBaseCookie();
@@ -361,12 +361,13 @@ class SessionCookie implements SessionHandlerInterface{
 
     private function validateCookieTimestamp()
     {
-        assert(isset($_COOKIE['psts']));
-        assert(isset($_COOKIE['psts2']));
-
-        if ($_COOKIE['psts'] -1 > time() || $_COOKIE['psts2'] - 1> time()) {
+        if (isset($_COOKIE['psts']) && $_COOKIE['psts'] -1 > time()) {
             $this->resetCookie(true);
-            $this->detectedAttack('Attack detected: Future timestamp.');
+            $this->detectedAttack('Attack detected: psts has future timestamp.');
+        }
+        if (isset($_COOKIE['psts2']) && $_COOKIE['psts2'] - 1> time()) {
+            $this->resetCookie(true);
+            $this->detectedAttack('Attack detected: psts2 has future timestamp.');
         }
     }
 
