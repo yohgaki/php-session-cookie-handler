@@ -21,19 +21,21 @@ session_set_save_handler($handler);
 session_start();
 ```
 
-## WARNING
-
-You must set your own self::KEY, otherwise session data is open to the world.
-
 ## Security
 
+* Cookie based session (and other client side sessions as well) is weak to session highjack compare to server side sessions.
+* There is no session data locking. Race condition can happen and some session data can lost.
 * Session data cookie is protected by AES256
-* Encryption key is protected by HKDF with FS/PFS in mind.
+* Encryption key is protected by HKDF derived key with FS/PFS in mind.
 * $_COOKIE['psct'] holds session data creation time. It can be trusted when decryption succeeds.
+* Sessions cannot live longer than session.gc_maxlifetime.
+* Server cannot invalidate stolen sessions. i.e. Server based session can delete session data at server side, but not client side stolen session cookies. You can try to delete cookie, but it's up to client.
+* Attacker (session hijackers) can keep active session by accessing before expiration defined by session.gc_maxlifetime. The same applies to server side sessions, but admin can remove server side session data.
 
 Remember that cookie based session is only suitable for **low security** requirement.
 
 ## Limitations
 
 * Session data max is 2KB. It's cookie.
-* Server cannot invalidate stolen sessions. i.e. Server based session can delete session data at server side.
+* Cookie does not have lock mechanism. Therefore, no data lock.
+* Server clocks must be synced. i.e. time() must return the same value for the moment.
