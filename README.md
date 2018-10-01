@@ -48,5 +48,7 @@ Remember that cookie based session is only suitable for **low security** require
 * Session lasts up to session.gc_maxlifetime.
 * Session INI settings such session.cookie_httponly is honored.
 
+I wrote fair amount of session manager codes. I observed some clients miss to store cookie value due to client side race condition probably. This handler mitigates it by having 2 versions of key info.
+
 Besides this has 2KB session data max and unlocked session data, it works like
 other session data save handlers. Enjoy with applications have low security requirements!
