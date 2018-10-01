@@ -10,6 +10,7 @@ session_set_save_handler($handler);
 
 session_start();
 $_SESSION['count']++;
+echo '<pre>';
 var_dump($_SESSION, $_COOKIE, ini_get('session.save_handler'));
 
 //session_regenerate_id(); // Testing regenerate. Regenerate is not needed for cookie based session.
