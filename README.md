@@ -39,3 +39,14 @@ Remember that cookie based session is only suitable for **low security** require
 * Session data max is 2KB. It's cookie.
 * Cookie does not have lock mechanism. Therefore, no data lock.
 * Server clocks must be synced. i.e. time() must return the same value for the moment.
+
+## How it works
+
+* HKDF with SHA256 uses internal secret key as IKM and external COOKIE['key'] as "salt", COOKIE['psts'] and COOKIE['psct'] as "info" to derivate AES256 encryption/decryption key.
+* AES256 is used to encrypt session data (COOKIE['psdat']). COOKIE['iv'] is used as IV.
+* Encryption key is updated every 60 sec.
+* Session lasts up to session.gc_maxlifetime.
+* Session INI settings such session.cookie_httponly is honored.
+
+Besides this has 2KB session data max and unlocked session data, it works like
+other session data save handlers. Enjoy with applications have low security requirements!
