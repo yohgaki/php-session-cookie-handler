@@ -9,7 +9,12 @@ $handler = new SessionCookie($key);
 session_set_save_handler($handler);
 
 session_start();
-$_SESSION['count']++;
+if (empty($_SESSION['count'])) {
+    $_SESSION['count'] = 1;
+} else {
+    $_SESSION['count']++;
+}
+
 echo '<pre>';
 var_dump($_SESSION, $_COOKIE, ini_get('session.save_handler'));
 

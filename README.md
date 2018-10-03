@@ -25,8 +25,9 @@ session_start();
 
 * Cookie based session (and other client side sessions as well) is weak to session highjack compare to server side sessions.
 * There is no session data locking. Race condition can happen and some session data can lost.
-* Session data cookie is protected by AES256
+* Session data cookie is protected by AES256.
 * Encryption key is protected by HKDF derived key with FS/PFS in mind.
+* Cookie values are protected by HMAC.
 * $_COOKIE['psct'] holds session data creation time. It can be trusted when decryption succeeds.
 * Sessions cannot live longer than session.gc_maxlifetime.
 * Server cannot invalidate stolen sessions. i.e. Server based session can delete session data at server side, but not client side stolen session cookies. You can try to delete cookie, but it's up to client.
@@ -37,18 +38,18 @@ Remember that cookie based session is only suitable for **low security** require
 ## Limitations
 
 * Session data max is 2KB. It's cookie.
-* Cookie does not have lock mechanism. Therefore, no data lock.
+* No session data lock. Cookie does not have lock mechanism.
 * Server clocks must be synced. i.e. time() must return the same value for the moment.
 
 ## How it works
 
-* HKDF with SHA256 uses internal secret key as IKM and external COOKIE['key'] as "salt", COOKIE['psts'] and COOKIE['psct'] as "info" to derivate AES256 encryption/decryption key.
+* HKDF with SHA256 uses internal secret key as IKM and external COOKIE['pskey'] as "salt", COOKIE['psts'] and COOKIE['psct'] as "info" to derivate AES256 encryption/decryption key.
 * AES256 is used to encrypt session data (COOKIE['psdat']). COOKIE['iv'] is used as IV.
+* Cookies used by this save handler are protected by HMAC.
 * Encryption key is updated every 60 sec.
 * Session lasts up to session.gc_maxlifetime.
 * Session INI settings such session.cookie_httponly is honored.
 
-I wrote fair amount of session manager codes. I observed some clients miss to store cookie value due to client side race condition probably. This handler mitigates it by having 2 versions of key info.
+I wrote fair amount of session manager codes. I observed some clients miss to store cookie value due to client side race condition probably. This save handler does not have mitigation for this.
 
-Besides this has 2KB session data max and unlocked session data, it works like
-other session data save handlers. Enjoy with applications have low security requirements!
+Besides this has 2KB session data max and unlocked session data, it works like other session data save handlers. Enjoy with applications have low security requirements!
