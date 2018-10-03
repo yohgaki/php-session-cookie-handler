@@ -7,7 +7,7 @@
  * Requirement: PHP 7.1 and up, openssl for encryption.
  *
  * HUGE WARNING: You MUST set your own super secret master key.
- * i.e. Set $this->KEY of your own.
+ * i.e. Set $this->key of your own.
  *
  * WARNING: Data is protected by encryption. However once session data
  * is stolen, attackers can keep stolen session as long as they want.
@@ -56,9 +56,10 @@ class SessionCookie implements SessionHandlerInterface{
 
         $env_key = getenv('PHP_SESSION_COOKIE_KEY');
         assert(is_null($env_key) || (is_string($env_key) && strlen($env_key) > 20));
+
         $this->key = $key ?? $env_key ?? null;
         if (!$this->key) {
-            throw new Exception('Cookie based session cannot work without secret master key.');
+            throw new InvalidArgumentException('Cookie based session cannot work without secret master key.');
         }
 
         $this->use_exception = $use_exception;
@@ -114,7 +115,7 @@ class SessionCookie implements SessionHandlerInterface{
             $this->updateCookie();
         }
         if (strlen($data) > 2048) {
-            trigger_error('You cannot save too large session data over 2KB.');
+            throw new LengthException('You cannot save too large session data over 2KB.');
             $this->resetCookie();
             $this->setDataCookie('');
             return true;
