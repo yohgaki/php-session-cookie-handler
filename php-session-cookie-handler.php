@@ -55,7 +55,7 @@ class SessionCookie implements SessionHandlerInterface{
         assert(is_bool($use_exception));
 
         $env_key = getenv('PHP_SESSION_COOKIE_KEY');
-        assert(is_null($env_key) || (is_string($env_key) && strlen($env_key) > 20));
+        assert($env_key === false || (is_string($env_key) && strlen($env_key) > 20));
 
         $this->key = $key ?? $env_key ?? null;
         if (!$this->key) {
