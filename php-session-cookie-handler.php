@@ -62,8 +62,6 @@ class SessionCookie implements SessionHandlerInterface{
             throw new InvalidArgumentException('Cookie based session cannot work without secret master key.');
         }
 
-        $this->use_exception = $use_exception;
-
         $this->cookie_lifetime = ini_get('session.cookie_lifetime');
         $this->cookie_path     = ini_get('session.cookie_path');
         $this->cookie_domain   = ini_get('session.cookie_domain');
@@ -71,6 +69,7 @@ class SessionCookie implements SessionHandlerInterface{
         $this->cookie_httponly = ini_get('session.cookie_httponly');
 
         $this->gc_maxlifetime = ini_get('session.gc_maxlifetime');
+        $this->use_exception  = $use_exception;
     }
 
     function open($path, $sess_name)
@@ -114,12 +113,14 @@ class SessionCookie implements SessionHandlerInterface{
         if ($_COOKIE['psts'] + self::RENEW < time()) {
             $this->updateCookie();
         }
+
         if (strlen($data) > 2048) {
             throw new LengthException('You cannot save too large session data over 2KB.');
             $this->resetCookie();
             $this->setDataCookie('');
             return true;
         }
+
         $edata = $this->encrypt($data);
         $this->setDataCookie($edata);
         return true;
@@ -254,6 +255,7 @@ class SessionCookie implements SessionHandlerInterface{
             empty($_COOKIE['psdat']) ||
             empty($_COOKIE['psvk'])
         ) {
+            // Simply reset. This could be initial state, browser bug, attack, etc.
             $this->resetCookie(true);
             return false;
         }
@@ -317,6 +319,7 @@ class SessionCookie implements SessionHandlerInterface{
 
         $this->setcookie('psdat', $edata);
         $_COOKIE['psdat'] = $edata;
+
         foreach($this->cookies as $c) {
             $tmp[] = $_COOKIE[$c];
         }
